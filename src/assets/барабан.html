@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Адаптивный барабан фортуны</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        :root {
+            --base-size: 3vmin;
+            --item-height: calc(var(--base-size) * 2.5);
+            --drum-width: calc(var(--base-size) * 20);
+            --drum-height: calc(var(--item-height) * 5.5);
+            --pointer-width: calc(var(--item-height) * 0.6);
+            --font-size: calc(var(--base-size) * 0.9);
+            --button-padding: calc(var(--base-size) * 0.8) calc(var(--base-size) * 2.5);
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a6c 0%, #b21f1f 50%, #fdbb2d 100%);
+            padding: 2vmin;
+            overflow: auto;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: calc(var(--drum-width) + 20vmin);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--base-size);
+            padding: var(--base-size);
+            box-shadow: 0 3vmin 6vmin rgba(0, 0, 0, 0.3);
+            margin: 2vmin;
+        }
+        
+        h1 {
+            margin-bottom: calc(var(--base-size) * 1.2);
+            text-align: center;
+            font-size: calc(var(--base-size) * 1.8);
+            color: #2c3e50;
+            text-shadow: 0.1vmin 0.1vmin 0.2vmin rgba(0, 0, 0, 0.1);
+        }
+        
+        .drum-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: calc(var(--base-size) * 0.5) 0;
+            width: 100%;
+            position: relative;
+        }
+        
+        .drum {
+            width: var(--drum-width);
+            height: var(--drum-height);
+            position: relative;
+            overflow: hidden;
+            border-radius: calc(var(--base-size) * 0.75);
+            box-shadow: 0 2vmin 5vmin rgba(0, 0, 0, 0.4);
+            background: linear-gradient(to bottom, #2c3e50, #1a2530);
+            border: calc(var(--base-size) * 0.25) solid #8b5a2b;
+            border-left: calc(var(--base-size) * 0.4) solid #8b5a2b;
+            border-right: calc(var(--base-size) * 0.4) solid #8b5a2b;
+        }
+        
+        .drum-inner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            transition: transform 5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        .drum-item {
+            height: var(--item-height);
+            display: flex;
+            align-items: center;
+            padding: 0 calc(var(--base-size) * 1.2);
+            font-size: var(--font-size);
+            font-weight: bold;
+            color: white;
+            border-bottom: 0.2vmin solid rgba(255, 255, 255, 0.1);
+            text-shadow: 0.1vmin 0.1vmin 0.2vmin rgba(0, 0, 0, 0.6);
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .drum-item:nth-child(odd) {
+            background: rgba(52, 152, 219, 0.7);
+        }
+        
+        .drum-item:nth-child(even) {
+            background: rgba(41, 128, 185, 0.7);
+        }
+        
+        .drum-item.premium {
+            background: linear-gradient(to right, rgba(231, 76, 60, 0.7), rgba(241, 196, 15, 0.7));
+        }
+        
+        .pointer {
+            width: var(--pointer-width);
+            height: var(--item-height);
+            background: #ff5e62;
+            clip-path: polygon(0 0, 100% 50%, 0 100%);
+            margin-right: -0.5vmin;
+            z-index: 10;
+            box-shadow: 0.5vmin 0 1vmin rgba(0, 0, 0, 0.3);
+            border-radius: 1vmin 0 0 1vmin;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin-top: calc(var(--base-size) * 1.2);
+        }
+        
+        .spin-button {
+            background: linear-gradient(to right, #ff9966, #ff5e62);
+            color: white;
+            border: none;
+            padding: var(--button-padding);
+            font-size: calc(var(--font-size) * 1.1);
+            border-radius: 10vmin;
+            cursor: pointer;
+            margin-top: calc(var(--base-size) * 1.2);
+            transition: all 0.3s;
+            box-shadow: 0 1vmin 3vmin rgba(0, 0, 0, 0.2);
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        .spin-button:hover {
+            transform: translateY(-0.5vmin);
+            box-shadow: 0 1.5vmin 4vmin rgba(0, 0, 0, 0.3);
+        }
+        
+        .spin-button:active {
+            transform: translateY(0.2vmin);
+        }
+        
+        .spin-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            margin-top: calc(var(--base-size) * 1.2);
+            padding: calc(var(--base-size) * 1.2);
+            background: #f8f9fa;
+            border-radius: calc(var(--base-size) * 0.75);
+            text-align: center;
+            min-height: calc(var(--item-height) * 1);
+            width: 100%;
+            max-width: calc(var(--drum-width) * 0.8);
+            box-shadow: inset 0 0 3vmin rgba(0, 0, 0, 0.1);
+            border: 0.3vmin dashed #3498db;
+        }
+        
+        .result h2 {
+            color: #2c3e50;
+            margin-bottom: calc(var(--base-size) * 0.6);
+            font-size: calc(var(--font-size) * 1);
+        }
+        
+        .result-text {
+            font-size: calc(var(--font-size) * 1);
+            color: #e74c3c;
+            font-weight: bold;
+            min-height: calc(var(--item-height) * 0.6);
+            padding: calc(var(--base-size) * 0.6);
+            transition: all 0.5s;
+        }
+        
+        .decorative-side {
+            width: calc(var(--item-height) * 0.6);
+            height: var(--drum-height);
+            background: linear-gradient(to right, #8b5a2b, #a17a4b, #8b5a2b);
+            border-radius: 0 1.5vmin 1.5vmin 0;
+            margin-left: -0.5vmin;
+            box-shadow: 0.5vmin 0 3vmin rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .decorative-side::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 1.5vmin;
+            right: 1.5vmin;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%);
+        }
+        
+        .decorative-end {
+            position: absolute;
+            width: 2vmin;
+            height: 100%;
+            background: #8b5a2b;
+            left: -2vmin;
+            top: 0;
+            border-radius: 0.8vmin 0 0 0.8vmin;
+        }
+        
+        .drum-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: linear-gradient(to bottom, 
+                rgba(0,0,0,0.8) 0%, 
+                transparent 20%, 
+                transparent 80%, 
+                rgba(0,0,0,0.8) 100%);
+            border-radius: calc(var(--base-size) * 0.5);
+            z-index: 5;
+        }
+        
+        .winning-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 0.3vmin;
+            background: gold;
+            z-index: 6;
+            box-shadow: 0 0 1vmin gold;
+            pointer-events: none;
+        }
+        
+        @media (max-height: 600px) {
+            :root {
+                --base-size: 2.5vmin;
+            }
+            
+            .container {
+                transform: scale(0.9);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Барабан Фортуны</h1>
+        
+        <div class="drum-container">
+            <div class="decorative-side">
+                <div class="decorative-end"></div>
+            </div>
+            <div class="pointer"></div>
+            <div class="drum">
+                <div class="drum-mask"></div>
+                <div class="winning-line" style="top: 50%; transform: translateY(-50%);"></div>
+                <div class="drum-inner" id="drumInner">
+                    <!-- Призы будут добавляться динамически через JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="spin-button" id="spinButton">Крутить барабан</button>
+            
+            <div class="result">
+                <h2>Результат:</h2>
+                <p class="result-text" id="resultText">Ждём вашего вращения!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const drumInner = document.getElementById('drumInner');
+            const spinButton = document.getElementById('spinButton');
+            const resultText = document.getElementById('resultText');
+            
+            // Призы на барабане
+            const prizes = [
+                { name: "Главный приз", type: "premium" },
+                { name: "Скидка 20%", type: "regular" },
+                { name: "Бесплатная доставка", type: "regular" },
+                { name: "Подарок", type: "premium" },
+                { name: "10% скидка", type: "regular" },
+                { name: "Фирменный сувенир", type: "regular" },
+                { name: "Двойной бонус", type: "regular" },
+                { name: "50% скидка", type: "premium" },
+                { name: "Удача в следующий раз", type: "regular" },
+                { name: "Малый приз", type: "regular" }
+            ];
+            
+            // Получаем вычисленное значение высоты элемента
+            function getItemHeight() {
+                if (drumInner.firstChild) {
+                    return drumInner.firstChild.offsetHeight;
+                }
+                
+                // Создаем временный элемент для измерения
+                const tempItem = document.createElement('div');
+                tempItem.className = 'drum-item';
+                tempItem.style.position = 'absolute';
+                tempItem.style.visibility = 'hidden';
+                tempItem.innerHTML = '&nbsp;';
+                document.body.appendChild(tempItem);
+                
+                // Получаем высоту
+                const height = tempItem.offsetHeight;
+                
+                // Удаляем временный элемент
+                document.body.removeChild(tempItem);
+                
+                return height;
+            }
+            
+            // Создаем элементы барабана
+            function createDrumItems() {
+                drumInner.innerHTML = '';
+                
+                // Добавляем призы (две полные копии для бесшовной анимации)
+                for (let i = 0; i < 6; i++) {
+                    prizes.forEach(prize => {
+                        const item = document.createElement('div');
+                        item.className = `drum-item ${prize.type === 'premium' ? 'premium' : ''}`;
+                        item.textContent = prize.name;
+                        item.dataset.prize = prize.name;
+                        
+                        // Запрещаем перетаскивание и выделение
+                        item.draggable = false;
+                        item.addEventListener('mousedown', function(e) {
+                            e.preventDefault();
+                        });
+                        
+                        drumInner.appendChild(item);
+                    });
+                }
+            }
+            
+            createDrumItems();
+            
+            let isSpinning = false;
+            let currentPosition = 0;
+            
+            // Функция вращения барабана
+            spinButton.addEventListener('click', () => {
+                if (isSpinning) return;
+                
+                isSpinning = true;
+                spinButton.disabled = true;
+                resultText.textContent = "Барабан вращается...";
+                
+                // Случайный выбор приза
+                const winningIndex = Math.floor(Math.random() * prizes.length);
+                const winningPrize = prizes[winningIndex].name;
+                
+                // Получаем актуальную высоту элемента
+                const itemHeight = getItemHeight();
+                const totalHeight = prizes.length * itemHeight;
+                const drumHeight = document.querySelector('.drum').offsetHeight;
+                
+                // Вычисляем смещение так, чтобы выигрышный элемент оказался напротив указателя
+                // Указатель находится на 50% высоты барабана
+                const pointerPosition = drumHeight / 2;
+                
+                // Вычисляем позицию выигрышного элемента относительно указателя
+                // Нам нужно, чтобы центр выигрышного элемента был напротив указателя
+                const targetPosition = winningIndex * itemHeight + (itemHeight / 2) - pointerPosition;
+                
+                // Добавляем дополнительное смещение для анимации (несколько полных оборотов)
+                const fullCircles = 3; // Количество полных кругов
+                const extraSpin = fullCircles * totalHeight;
+                
+                // Общая позиция для остановки
+                const totalOffset = extraSpin + targetPosition;
+                
+                // Включаем анимацию
+                drumInner.style.transition = 'transform 5s cubic-bezier(0.17, 0.67, 0.83, 0.67)';
+                // Вращаем барабан
+                drumInner.style.transform = `translateY(-${totalOffset}px)`;
+                
+                // Показываем результат после завершения вращения
+                setTimeout(() => {
+                    resultText.textContent = winningPrize;
+                    isSpinning = false;
+                    spinButton.disabled = false;
+                    
+                    // Анимация результата
+                    resultText.style.transform = 'scale(1.2)';
+                    setTimeout(() => {
+                        resultText.style.transform = 'scale(1)';
+                    }, 500);
+                    
+                    // Сбрасываем transition и корректируем позицию для создания эффекта бесконечности
+                    setTimeout(() => {
+                        drumInner.style.transition = 'none';
+                        
+                        // Вычисляем новую позицию с учетом зацикливания
+                        // Важно: используем остаток от деления на общую высоту
+                        currentPosition = totalOffset % totalHeight;
+                        
+                        // Устанавливаем скорректированную позицию
+                        drumInner.style.transform = `translateY(-${currentPosition}px)`;
+                    }, 100);
+                }, 5000);
+            });
+            
+            // Блокируем только прокрутку внутри барабана, но не всей страницы
+            drumInner.addEventListener('wheel', function(e) {
+                e.preventDefault();
+            }, { passive: false });
+            
+            // Блокируем перетаскивание элементов барабана
+            drumInner.addEventListener('dragstart', function(e) {
+                e.preventDefault();
+            });
+            
+            // Блокируем выделение текста внутри барабана
+            drumInner.addEventListener('selectstart', function(e) {
+                e.preventDefault();
+            });
+            
+            // Блокируем контекстное меню на барабане
+            drumInner.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+        });
+    </script>
+</body>
+</html>
