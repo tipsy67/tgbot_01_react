@@ -8,6 +8,7 @@ import Header from './components/layout/footer/Header'
 import backgroundUrl from './assets/hero-pic.jpg'
 
 function App() {
+  const datePrizeDraw = new Date('2025-09-25T15:30:00'); 
   const [tab, setTab] = useState('main')
   const [count, setCount] = useState(0)
   const isStaff = false
@@ -26,7 +27,7 @@ function App() {
       
       <main className="flex-1 flex justify-center items-center overflow-auto p-4">
         <div className="w-full max-w-md">
-          {tab === 'main' && <Home counter={counter}/>}
+          {tab === 'main' && <Home targetDate={datePrizeDraw}/>}
           {tab === 'help' && <div className="bg-base-200 bg-opacity-90 rounded-lg p-8 backdrop-blur-sm">Help Content</div>}
           {tab === 'settings' && <div className="bg-base-200 bg-opacity-90 rounded-lg p-8 backdrop-blur-sm">Settings Content</div>}
           {tab === 'fortune' && <div className="bg-base-200 bg-opacity-90 rounded-lg p-8 backdrop-blur-sm">Fortune Content</div>}
