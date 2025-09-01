@@ -27,18 +27,26 @@ function App() {
     { name: "Малый приз", type: "regular" },
   ];
 
+  useEffect(() => {
+    if (window.Telegram?.WebApp) {
+      window.Telegram.WebApp.expand();
+      window.Telegram.WebApp.disableVerticalSwipes();
+      window.Telegram.WebApp.setHeaderColor('#2b2d31');
+    }
+  }, []);
+
   return (
     <div
-      className="h-[100dvh] flex flex-col overflow-hidden bg-cover bg-center bg-no-repeat bg-fixed relative
+      className="min-h-[100dvh] flex flex-col bg-cover bg-center bg-no-repeat bg-fixed relative
                  before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-b 
                  before:from-white/80 before:to-transparent"
       style={{ backgroundImage: `url(${backgroundUrl})` }}
     >
-      <div className="relative z-10 flex flex-col h-full">
+      <div className="relative z-10 flex flex-col min-h-full">
         <Header entrantID="23456" />
 
-        <main className="flex-1 flex justify-center items-center overflow-auto p-4">
-          <div className="w-full max-w-md">
+        <main className="flex-1 flex justify-center overflow-auto">
+          <div className="w-full max-w-md flex flex-col items-center py-4">
             {tab === "main" && <Home targetDate={datePrizeDraw} />}
             {tab === "help" && (
               <div className="bg-base-200 bg-opacity-90 rounded-lg p-8 backdrop-blur-sm">
@@ -50,7 +58,7 @@ function App() {
                 Settings Content
               </div>
             )}
-            {tab === "fortune" && <FortuneDrum prizes={prizes}/>}
+            {tab === "fortune" && <FortuneDrum prizes={prizes} />}
           </div>
         </main>
 

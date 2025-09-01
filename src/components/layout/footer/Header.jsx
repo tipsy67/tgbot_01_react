@@ -1,6 +1,6 @@
 export default function Header({entrantID, ...props}) {
     return (
-        <header className="w-full"> 
+        <header className="w-full sticky top-0 z-50"> 
             <ul className="menu menu-horizontal bg-base-200 bg-opacity-90 backdrop-blur-sm rounded-full shadow-lg flex-nowrap whitespace-nowrap w-full justify-between px-6">
             <li className="disabled">
                 <a>

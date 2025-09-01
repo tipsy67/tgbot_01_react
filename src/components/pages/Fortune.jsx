@@ -48,14 +48,14 @@ export default function FortuneDrum({ prizes, ...props }) {
   return (
     <div className="w-full flex flex-col items-center">
       {/* Заголовок */}
-      <div className="mb-4 p-4 bg-blue-50/40 rounded-lg w-full text-center border border-white/20 backdrop-blur-sm">
+      <div className="mb-2 p-4 bg-blue-50/40 rounded-lg w-full text-center border border-white/20 backdrop-blur-sm">
         <h1 className="text-2xl font-bold text-white text-shadow">
           Барабан Фортуны
         </h1>
       </div>
 
       {/* Контейнер барабана по центру */}
-      <div className="flex justify-center items-center mb-6 w-full">
+      <div className="flex justify-center items-center mb-4 w-full">
         {/* Левый указатель */}
         <div className="w-8 h-14 bg-gradient-to-r from-red-500 to-pink-500 clip-triangle-left z-10 shadow-lg mr-[-4px] rounded-r" />
 
@@ -96,7 +96,7 @@ export default function FortuneDrum({ prizes, ...props }) {
       </div>
 
       {/* Кнопка с неоновым мерцанием */}
-      <div className="w-full flex flex-col items-center">
+      <div className="w-full flex flex-col items-center mb-20">
         <button
           className="btn p-8 glass w-full mt-4 text-center bg-secondary/50 border-2 border-yellow-400/50 hover:border-yellow-300/70 transition-all duration-300 neon-button"
           onClick={spinDrum}
