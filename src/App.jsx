@@ -7,6 +7,7 @@ import Home from "./components/pages/Home";
 import Header from "./components/layout/footer/Header";
 import backgroundUrl from "./assets/hero-pic.jpg";
 import FortuneDrum from "./components/pages/Fortune";
+import GetContact from "./components/pages/GetContact";
 
 function App() {
   const datePrizeDraw = new Date("2025-09-25T15:30:00");
@@ -27,13 +28,74 @@ function App() {
     { name: "Малый приз", type: "regular" },
   ];
 
+  const [showModal, setShowModal] = useState(true);
+  const [userData, setUserData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     if (window.Telegram?.WebApp) {
       window.Telegram.WebApp.expand();
-      window.Telegram.WebApp.disableVerticalSwipes();
-      window.Telegram.WebApp.setHeaderColor('#2b2d31');
+
+      const initData = window.Telegram.WebApp.initData;
+      if (initData) {
+        parseInitData(initData);
+      }
     }
   }, []);
+
+  const parseInitData = (initDataString) => {
+    try {
+      const urlParams = new URLSearchParams(initDataString);
+      const userParam = urlParams.get('user');
+
+      if (userParam) {
+        const user = JSON.parse(decodeURIComponent(userParam));
+        setUserData({
+          id: user.id,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          username: user.username,
+          language_code: user.language_code
+        });
+        console.log('Контакты получены:', user)
+      }
+    } catch (err) {
+      console.error('Error parsing initData:', err);
+    }
+  };
+
+  const handleGetContacts = () => {
+    console.log('handleGetContacts called');
+
+    if (!window.Telegram?.WebApp) {
+      console.error('Telegram WebApp not available');
+      alert('Функция доступна только в Telegram');
+      return;
+    }
+
+    console.log('Telegram WebApp available:', window.Telegram.WebApp);
+    setIsLoading(true);
+
+    if (window.Telegram?.WebApp) {
+      window.Telegram.WebApp.requestContact(
+        (contactData) => {
+          setIsLoading(false);
+          if (contactData) {
+            console.log('Контакты получены:', contactData);
+            const initData = window.Telegram.WebApp.initData;
+            if (initData) {
+              parseInitData(initData);
+            }
+            setShowModal(false);
+          }
+        }
+      );
+    }
+  };
+
+  const handleSkip = () => {
+    setShowModal(false);
+  };
 
   return (
     <div
@@ -68,6 +130,11 @@ function App() {
           isStaff={isStaff}
         />
       </div>
+      <GetContact
+        showModal={showModal}
+        isLoading={isLoading}
+        onGetContacts={handleGetContacts}
+        onSkip={handleSkip} />
     </div>
   );
 }
