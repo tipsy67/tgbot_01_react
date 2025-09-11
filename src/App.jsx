@@ -8,6 +8,9 @@ import Header from "./components/layout/footer/Header";
 import backgroundUrl from "./assets/hero-pic.jpg";
 import FortuneDrum from "./components/pages/Fortune";
 import GetContact from "./components/pages/GetContact";
+import WarningWindow from "./components/pages/WarningWindow";
+
+const API_BASE = 'https://u821fr-95-158-216-233.ru.tuna.am/api/v1/users';
 
 function App() {
   const datePrizeDraw = new Date("2025-09-25T15:30:00");
@@ -31,31 +34,47 @@ function App() {
   const [showModal, setShowModal] = useState(true);
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showWarning, setShowWarning] = useState(false);
 
   useEffect(() => {
-    if (window.Telegram?.WebApp) {
+    const initData = window.Telegram.WebApp.initData;
+    if (initData) {
       window.Telegram.WebApp.expand();
 
-      const initData = window.Telegram.WebApp.initData;
-      if (initData) {
-        parseInitData(initData);
-      }
+
+      parseInitData(initData);
+    }
+    else {
+      setShowModal(false);
+      setShowWarning(true);
     }
   }, []);
 
-  const parseInitData = (initDataString) => {
+  const parseInitData = async (initDataString) => {
     try {
       const urlParams = new URLSearchParams(initDataString);
       const userParam = urlParams.get('user');
 
       if (userParam) {
         const user = JSON.parse(decodeURIComponent(userParam));
+        const ticketsUrl = `${API_BASE}/tickets?tg_user_id=${user.id}`;
+        const statusUrl = `${API_BASE}/status?tg_user_id=${user.id}`;
+
+        const [ticketsResponse, statusResponse] = await Promise.all([
+          fetch(ticketsUrl),
+          fetch(statusUrl)
+        ]);
+
+        const userTickets = ticketsResponse.ok ? (await ticketsResponse.json()).tickets : 0;
+        const userStatus = statusResponse.ok ? (await statusResponse.json()).status : 'unknown';
         setUserData({
           id: user.id,
           firstName: user.first_name,
           lastName: user.last_name,
           username: user.username,
-          language_code: user.language_code
+          language_code: user.language_code,
+          tickets: userTickets,
+          status: userStatus
         });
         console.log('Контакты получены:', user)
       }
@@ -82,10 +101,6 @@ function App() {
           setIsLoading(false);
           if (contactData) {
             console.log('Контакты получены:', contactData);
-            const initData = window.Telegram.WebApp.initData;
-            if (initData) {
-              parseInitData(initData);
-            }
             setShowModal(false);
           }
         }
@@ -104,8 +119,9 @@ function App() {
                  before:from-white/80 before:to-transparent"
       style={{ backgroundImage: `url(${backgroundUrl})` }}
     >
+      <WarningWindow showWarning={showWarning} />
       <div className="relative z-10 flex flex-col min-h-full">
-        <Header entrantID="23456" />
+        <Header entrantID="23456" userData={userData}/>
 
         <main className="flex-1 flex justify-center overflow-auto">
           <div className="w-full max-w-md flex flex-col items-center py-4">
