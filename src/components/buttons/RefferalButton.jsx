@@ -1,4 +1,4 @@
-export default function ReferralButton({ userUIID, className = '', ...props }) {
+export default function ReferralButton({ userUIID, ...props }) {
     const generateReferralLink = () => {
         // const baseUrl = window.location.href.split('?')[0];
         return `https://t.me/dantoropov_test_bot?start=${userUIID}`;
@@ -38,7 +38,8 @@ const handleShare = async () => {
     return (
         <button
             onClick={handleShare}
-            className={`btn btn-primary mt-4 gap-2 w-full hover:scale-105 transition-transform duration-200`}
+            className={`btn bg-secondary/50 border-secondary/50 text-white mt-4 gap-2 w-full hover:scale-105 transition-transform duration-200`}
+            // className={`btn btn-primary mt-4 gap-2 w-full hover:scale-105 transition-transform duration-200`}
             disabled={!userUIID}
             {...props}
         >
