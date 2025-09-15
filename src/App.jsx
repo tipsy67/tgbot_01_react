@@ -9,8 +9,9 @@ import backgroundUrl from "./assets/hero-pic.jpg";
 import FortuneDrum from "./components/pages/Fortune";
 import GetContact from "./components/pages/GetContact";
 import WarningWindow from "./components/pages/WarningWindow";
+import { useUserData } from "./hooks/useUserData"; 
 
-const API_BASE = 'https://hfi3kh-95-158-216-233.ru.tuna.am/api/v1/users';
+const API_BASE = 'https://tbcata-95-158-216-233.ru.tuna.am/api/v1/users';
 
 function App() {
   const datePrizeDraw = new Date("2025-09-25T15:30:00");
@@ -31,20 +32,27 @@ function App() {
     { name: "Малый приз", type: "regular" },
   ];
 
-  const [showModal, setShowModal] = useState(false);
-  const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
-  const [tickets, setTickets] = useState(0);
-  const [status, setStatus] = useState(false);
+
+  const {
+    userData,
+    tickets,
+    status,
+    requiredChannels,
+    showModal,
+    loading: userDataLoading,
+    error: userDataError,
+    fetchUserData,
+    setShowModal
+  } = useUserData();
 
   useEffect(() => {
     const initData = window.Telegram.WebApp.initData;
     if (initData) {
       window.Telegram.WebApp.expand();
       parseInitData(initData);
-    }
-    else {
+    } else {
       setShowModal(false);
       setShowWarning(true);
     }
@@ -57,41 +65,10 @@ function App() {
 
       if (userParam) {
         const tg_user = JSON.parse(decodeURIComponent(userParam));
-
-        const userUrl = `${API_BASE}?tg_user_id=${tg_user.id}`;
-        const ticketsUrl = `${API_BASE}/tickets?tg_user_id=${tg_user.id}`;
-        const statusUrl = `${API_BASE}/status?tg_user_id=${tg_user.id}`;
-
-        const [userResponse, ticketsResponse, statusResponse] = await Promise.all([
-          fetch(userUrl),
-          fetch(ticketsUrl),
-          fetch(statusUrl)
-        ]);
-
-        const user = userResponse.ok ? (await userResponse.json()) : null;
-        const userTickets = ticketsResponse.ok ? (await ticketsResponse.json()).tickets : 0;
-        const userStatus = statusResponse.ok ? (await statusResponse.json()).status : 'unknown';
-        setUserData({
-          id: tg_user.id,
-          firstName: tg_user.first_name,
-          lastName: tg_user.last_name,
-          username: tg_user.username,
-          language_code: tg_user.language_code,
-          entrant_id: user?user.entrant_id:null,
-          phone_number: user?user.phone_number:null,
-          last_activity: user?user.last_activity:null,
-          user_uuid: user?user.user_uuid:null,
-          is_staff: user?user.is_staff:null,
-          is_admin: user?user.is_admin:null,
-        });
-        setStatus(userStatus);
-        setTickets(userTickets);
-        if (!user?.phone_number) {
-          console.log('handleGetContacts enable');
-          setShowModal(true);
-        }
-        console.log('tg data:', tg_user)
-        console.log('db data:', user)
+        console.log('tg data:', tg_user);
+        
+        // Передаем tg_user в хук для загрузки данных
+        await fetchUserData(tg_user);
       }
     } catch (err) {
       console.error('Error parsing initData:', err);
@@ -100,7 +77,6 @@ function App() {
 
   const handleGetContacts = () => {
     console.log('handleGetContacts called');
-
 
     if (!window.Telegram?.WebApp) {
       console.error('Telegram WebApp not available');
@@ -112,21 +88,44 @@ function App() {
     setIsLoading(true);
 
     if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.requestContact(
-        (contactData) => {
-          setIsLoading(false);
-          if (contactData) {
-            console.log('Контакты получены:', contactData);
-            setShowModal(false);
+      window.Telegram.WebApp.requestContact((contactData) => {
+        setIsLoading(false);
+        if (contactData) {
+          console.log('Контакты получены:', contactData);
+          setShowModal(false);
+          
+          // После получения контактов можно обновить данные пользователя
+          if (userData?.id) {
+            fetchUserData({ id: userData.id }); // Обновляем данные
           }
         }
-      );
+      });
     }
   };
 
   const handleSkip = () => {
     setShowModal(false);
   };
+
+  // Показываем загрузку если данные еще грузятся
+  if (userDataLoading) {
+    return (
+      <div className="min-h-[100dvh] flex items-center justify-center">
+        <div className="loading loading-spinner loading-lg"></div>
+      </div>
+    );
+  }
+
+  // Показываем ошибку если есть
+  if (userDataError) {
+    return (
+      <div className="min-h-[100dvh] flex items-center justify-center">
+        <div className="alert alert-error">
+          <span>Ошибка загрузки данных: {userDataError}</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
