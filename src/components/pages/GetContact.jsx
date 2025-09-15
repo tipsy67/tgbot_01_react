@@ -21,7 +21,7 @@ export default function GetContact({ showModal, isLoading, onGetContacts, onSkip
               </svg>
             </div>
 
-            {/* <h3 className="text-xl font-bold mb-2"></h3> */}
+            <h3 className="text-xl font-bold mb-2"></h3>
             <p className="text-gray-600 mb-4">
               Предоставьте доступ для лучшего взаимодействия с приложением
             </p>

@@ -9,6 +9,7 @@ import backgroundUrl from "./assets/hero-pic.jpg";
 import FortuneDrum from "./components/pages/Fortune";
 import GetContact from "./components/pages/GetContact";
 import WarningWindow from "./components/pages/WarningWindow";
+import CheckSubscribe from "./components/pages/CheckSubscribe"; 
 import { useUserData } from "./hooks/useUserData"; 
 
 const API_BASE = 'https://tbcata-95-158-216-233.ru.tuna.am/api/v1/users';
@@ -34,6 +35,7 @@ function App() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
+  const [showChannelsModal, setShowChannelsModal] = useState(false);
 
   const {
     userData,
@@ -44,7 +46,8 @@ function App() {
     loading: userDataLoading,
     error: userDataError,
     fetchUserData,
-    setShowModal
+    setShowModal,
+    refreshData 
   } = useUserData();
 
   useEffect(() => {
@@ -58,6 +61,7 @@ function App() {
     }
   }, []);
 
+
   const parseInitData = async (initDataString) => {
     try {
       const urlParams = new URLSearchParams(initDataString);
@@ -67,7 +71,6 @@ function App() {
         const tg_user = JSON.parse(decodeURIComponent(userParam));
         console.log('tg data:', tg_user);
         
-        // Передаем tg_user в хук для загрузки данных
         await fetchUserData(tg_user);
       }
     } catch (err) {
@@ -94,9 +97,8 @@ function App() {
           console.log('Контакты получены:', contactData);
           setShowModal(false);
           
-          // После получения контактов можно обновить данные пользователя
           if (userData?.id) {
-            fetchUserData({ id: userData.id }); // Обновляем данные
+            fetchUserData({ id: userData.id }); 
           }
         }
       });
@@ -107,7 +109,19 @@ function App() {
     setShowModal(false);
   };
 
-  // Показываем загрузку если данные еще грузятся
+  const handleCheckSubscriptions = async () => {
+    console.log('Checking subscriptions...');
+    await refreshData(); 
+    
+    if (requiredChannels && requiredChannels.every(channel => channel.subscribe)) {
+      setShowChannelsModal(false);
+    }
+  };
+
+  const handleCloseChannelsModal = () => {
+    setShowChannelsModal(false);
+  };
+
   if (userDataLoading) {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center">
@@ -116,7 +130,6 @@ function App() {
     );
   }
 
-  // Показываем ошибку если есть
   if (userDataError) {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center">
@@ -136,7 +149,12 @@ function App() {
     >
       <WarningWindow showWarning={showWarning} />
       <div className="relative z-10 flex flex-col min-h-full">
-        <Header entrantID={userData?.entrant_id} tickets={tickets} status={status}/>
+        <Header 
+        entrantID={userData?.entrant_id} 
+        tickets={tickets} 
+        status={status}
+        onStatusChange={() => setShowChannelsModal(true)}
+        />
 
         <main className="flex-1 flex justify-center overflow-auto">
           <div className="w-full max-w-md flex flex-col items-center py-4">
@@ -158,14 +176,25 @@ function App() {
         <Dock
           activeTab={tab}
           onChange={(current) => setTab(current)}
-          isStaff={userData?.isStaff}
+          isStaff={userData?.is_staff} 
         />
       </div>
+      
+      {/* Модальное окно для контактов */}
       <GetContact
         showModal={showModal}
         isLoading={isLoading}
         onGetContacts={handleGetContacts}
-        onSkip={handleSkip} />
+        onSkip={handleSkip} 
+      />
+      
+      {/* Модальное окно для подписок на каналы */}
+      <CheckSubscribe
+        showModal={showChannelsModal}
+        channels={requiredChannels || []}
+        onClose={handleCloseChannelsModal}
+        onSubscribe={handleCheckSubscriptions} 
+      />
     </div>
   );
 }

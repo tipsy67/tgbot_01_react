@@ -1,4 +1,4 @@
-export default function Header({ entrantID, tickets, status, ...props }) {
+export default function Header({ entrantID, tickets, status, onStatusChange, ...props }) {
     return (
         <header className="w-full sticky top-0 z-50">
             <ul className="menu menu-horizontal bg-base-200 bg-opacity-90 backdrop-blur-sm rounded-full shadow-lg flex-nowrap whitespace-nowrap w-full justify-between px-6">
@@ -18,7 +18,7 @@ export default function Header({ entrantID, tickets, status, ...props }) {
                     </a>
                 </li>
                 <li>
-                    <a>
+                    <a onClick={onStatusChange}>
                         Статус
                         {status? (
                             <div className="badge badge-success">
