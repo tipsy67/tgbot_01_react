@@ -96,7 +96,7 @@ export default function FortuneDrum({ prizes, ...props }) {
       </div>
 
       {/* Кнопка с неоновым мерцанием */}
-      <div className="w-full flex flex-col items-center mb-20">
+      <div className="w-full flex flex-col items-center p-2 mb-20">
         <button
           className="btn p-8 glass w-full mt-4 text-center bg-secondary/50 border-2 border-yellow-400/50 hover:border-yellow-300/70 transition-all duration-300 neon-button"
           onClick={spinDrum}
