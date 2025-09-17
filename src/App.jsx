@@ -12,7 +12,6 @@ import WarningWindow from "./components/pages/WarningWindow";
 import CheckSubscribe from "./components/pages/CheckSubscribe"; 
 import { useUserData } from "./hooks/useUserData"; 
 
-const API_BASE = 'https://tbcata-95-158-216-233.ru.tuna.am/api/v1/users';
 
 function App() {
   const datePrizeDraw = new Date("2025-09-25T15:30:00");
@@ -169,7 +168,7 @@ function App() {
                 Settings Content
               </div>
             )}
-            {tab === "fortune" && <FortuneDrum prizes={prizes} />}
+            {tab === "fortune" && <FortuneDrum tg_user={userData} />}
           </div>
         </main>
 

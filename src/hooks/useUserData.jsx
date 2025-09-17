@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
+import { ENDPOINTS } from "../constants/apiEndpoints";
 
-const API_BASE = 'https://tbcata-95-158-216-233.ru.tuna.am/api/v1/users';
 
 export const useUserData = () => {
   const [userData, setUserData] = useState(null);
@@ -18,9 +18,9 @@ export const useUserData = () => {
     setError(null);
     
     try {
-      const userUrl = `${API_BASE}?tg_user_id=${tg_user.id}`;
-      const ticketsUrl = `${API_BASE}/tickets?tg_user_id=${tg_user.id}`;
-      const statusUrl = `${API_BASE}/status?tg_user_id=${tg_user.id}`;
+      const userUrl = ENDPOINTS.USER(tg_user.id);
+      const ticketsUrl = ENDPOINTS.TICKETS(tg_user.id);
+      const statusUrl = ENDPOINTS.STATUS(tg_user.id);
 
       const [userResponse, ticketsResponse, statusResponse] = await Promise.all([
         fetch(userUrl),
