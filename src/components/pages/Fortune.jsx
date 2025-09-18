@@ -7,23 +7,25 @@ export default function FortuneDrum({ tg_user, ...props }) {
   const [prizes, setPrizes] = useState([]);
   const [winningPrize, setWinningPrize] = useState(null);
   const [initialPrizesLoaded, setInitialPrizesLoaded] = useState(false);
-  const [spinsLeft, setSpinsLeft] = useState(3);
+  const [spinsLeft, setSpinsLeft] = useState(0);
   const [showWinModal, setShowWinModal] = useState(false);
   const [renderKey, setRenderKey] = useState(0); // Добавляем ключ для принудительного ререндера
   const drumInnerRef = useRef(null);
   const apiUrl = ENDPOINTS.PRIZES(tg_user.id);
-  const firstUrl = ENDPOINTS.PRIZES(0);
 
   // Загрузка начальных призов при монтировании компонента
   useEffect(() => {
     async function loadInitialPrizes() {
       try {
-        const response = await fetch(firstUrl);
+        const response = await fetch(`${apiUrl}&first_fetch=true`);
         if (!response.ok) throw new Error('Ошибка загрузки призов');
         
         const data = await response.json();
-        const initialPrizes = data.prizes || data;
+        const initialPrizes = data.prizes || [];
+        const currentSpinsLeft = data.spins_left || 0
+        
         setPrizes(initialPrizes);
+        setSpinsLeft(currentSpinsLeft);        
         setInitialPrizesLoaded(true);
       } catch (error) {
         console.error('Ошибка загрузки начальных призов:', error);
@@ -32,7 +34,7 @@ export default function FortuneDrum({ tg_user, ...props }) {
     }
 
     loadInitialPrizes();
-  }, [firstUrl]);
+  }, [tg_user.id]);
 
   // Функция вращения барабана
   async function spinDrum() {
@@ -48,10 +50,12 @@ export default function FortuneDrum({ tg_user, ...props }) {
       if (!prizesResponse.ok) throw new Error('Ошибка загрузки призов');
       
       const data = await prizesResponse.json();
-      const currentPrizes = data.prizes || data;
+      const currentPrizes = data.prizes || [];
+      const currentSpinsLeft = data.spins_left || 0
       
       // Обновляем призы и принудительно запускаем ререндер
       setPrizes(currentPrizes);
+      setSpinsLeft(currentSpinsLeft);
       setRenderKey(prev => prev + 1); // Изменяем ключ для принудительного ререндера
 
       if (currentPrizes.length === 0) {
@@ -65,7 +69,7 @@ export default function FortuneDrum({ tg_user, ...props }) {
       if (!winningPrize) {
         setResult("Нет выигрышного приза");
         setIsSpinning(false);
-        setSpinsLeft(prev => prev - 1);
+        // setSpinsLeft(prev => prev - 1);
         return;
       }
 
@@ -74,7 +78,7 @@ export default function FortuneDrum({ tg_user, ...props }) {
       
       if (winningIndex !== -1) {
         animateDrum(winningIndex);
-        setSpinsLeft(prev => prev - 1);
+        // setSpinsLeft(prev => prev - 1);
         setTimeout(() => {
           setShowWinModal(true);
         }, 4100);
@@ -117,6 +121,7 @@ export default function FortuneDrum({ tg_user, ...props }) {
       setTimeout(() => {
         setResult("Жми!");
         setIsSpinning(false);
+        setSpi()
       }, 4050);
     }
   }
@@ -130,8 +135,6 @@ export default function FortuneDrum({ tg_user, ...props }) {
   const getPrizeStyle = (prize) => {
     if (prize.check_quantity && prize.quantity <= 0) {
       return 'bg-gradient-to-r from-gray-500/70 to-gray-600/70 text-gray-300';
-    } else if (prize.bingo) {
-      return 'bg-gradient-to-r from-yellow-400/80 to-amber-500/80';
     } else {
       return 'bg-gradient-to-r from-blue-500/70 to-purple-500/70';
     }
@@ -191,7 +194,7 @@ export default function FortuneDrum({ tg_user, ...props }) {
       </div>
 
       {/* Кнопка */}
-      <div className="w-full flex flex-col items-center p-2 mb-8">
+      <div className="w-full flex flex-col items-center p-2 mb-20">
         <button
           className="btn p-6 glass w-full mt-4 text-center bg-secondary/50 border-2 border-yellow-400/50 hover:border-yellow-300/70 transition-all duration-300"
           onClick={spinDrum}
