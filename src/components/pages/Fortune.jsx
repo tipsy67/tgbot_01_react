@@ -69,7 +69,6 @@ export default function FortuneDrum({ tg_user, ...props }) {
       if (!winningPrize) {
         setResult("Нет выигрышного приза");
         setIsSpinning(false);
-        setSpinsLeft(prev => prev - 1);
         return;
       }
 
@@ -82,6 +81,8 @@ export default function FortuneDrum({ tg_user, ...props }) {
         setTimeout(() => {
           setShowWinModal(true);
         }, 4100);
+        setSpinsLeft(prev => prev - 1);
+
       } else {
         setResult("Ошибка приза");
         setIsSpinning(false);
@@ -127,6 +128,7 @@ export default function FortuneDrum({ tg_user, ...props }) {
 
   // Закрытие модального окна
   const closeModal = () => {
+    winningPrize.quantity = winningPrize.quantity - 1
     setShowWinModal(false);
   };
 
@@ -146,7 +148,7 @@ export default function FortuneDrum({ tg_user, ...props }) {
         <h1 className="text-2xl font-bold text-white text-shadow">
           Барабан Фортуны
         </h1>
-        <p className="text-yellow-300 text-sm mt-1 font-bold">
+        <p className="text-pink-300 text-sm mt-1 font-bold">
           Осталось попыток: {spinsLeft}
         </p>
         {!initialPrizesLoaded && (
