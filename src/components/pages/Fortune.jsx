@@ -69,7 +69,7 @@ export default function FortuneDrum({ tg_user, ...props }) {
       if (!winningPrize) {
         setResult("Нет выигрышного приза");
         setIsSpinning(false);
-        // setSpinsLeft(prev => prev - 1);
+        setSpinsLeft(prev => prev - 1);
         return;
       }
 
@@ -85,7 +85,6 @@ export default function FortuneDrum({ tg_user, ...props }) {
       } else {
         setResult("Ошибка приза");
         setIsSpinning(false);
-        setSpinsLeft(prev => prev - 1);
       }
     } catch (error) {
       console.error('Ошибка:', error);
