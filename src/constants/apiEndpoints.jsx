@@ -1,4 +1,4 @@
-const API_BASE = 'https://au21jj-212-3-159-241.ru.tuna.am/api/v1/users';
+const API_BASE = 'https://tftm86-212-3-159-241.ru.tuna.am/api/v1/users';
 
 export const ENDPOINTS = {
   USER: (userId) => `${API_BASE}?tg_user_id=${userId}`,

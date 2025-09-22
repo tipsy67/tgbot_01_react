@@ -13,7 +13,6 @@ export default function CheckSubscribe({
           
           {/* Заголовок и кнопка закрытия - фиксированные */}
           <div className="flex items-center justify-between mb-4 sticky top-0 bg-base-100 pb-4 z-20"> {/* Sticky header */}
-            <h3 className="text-xl font-bold">Требуется подписка</h3>
             <button
               className="btn btn-sm btn-circle btn-ghost"
               onClick={onClose}
@@ -27,11 +26,6 @@ export default function CheckSubscribe({
             
             {/* Описание */}
             <div className="text-center mb-4">
-              <div className="w-16 h-16 bg-warning/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                <svg className="w-8 h-8 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </div>
               <p className="text-gray-600">
                 Для участия в розыгрыше необходимо подписаться на следующие каналы
               </p>

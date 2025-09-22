@@ -9,8 +9,9 @@ import backgroundUrl from "./assets/hero-pic.jpg";
 import FortuneDrum from "./components/pages/Fortune";
 import GetContact from "./components/pages/GetContact";
 import WarningWindow from "./components/pages/WarningWindow";
-import CheckSubscribe from "./components/pages/CheckSubscribe"; 
-import { useUserData } from "./hooks/useUserData"; 
+import CheckSubscribe from "./components/pages/CheckSubscribe";
+import TicketInfo from "./components/pages/TicketInfo";
+import { useUserData } from "./hooks/useUserData";
 
 
 function App() {
@@ -19,22 +20,10 @@ function App() {
   const [count, setCount] = useState(0);
   const isStaff = false;
   const counter = 10;
-  const prizes = [
-    { name: "Главный приз", type: "premium" },
-    { name: "Скидка 20%", type: "regular" },
-    { name: "Бесплатная доставка", type: "regular" },
-    { name: "Подарок", type: "premium" },
-    { name: "10% скидка", type: "regular" },
-    { name: "Фирменный сувенир", type: "regular" },
-    { name: "Двойной бонус", type: "regular" },
-    { name: "50% скидка", type: "premium" },
-    { name: "Удача в следующий раз", type: "regular" },
-    { name: "Малый приз", type: "regular" },
-  ];
-
   const [isLoading, setIsLoading] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
   const [showChannelsModal, setShowChannelsModal] = useState(false);
+  const [showTicketModal, setShowTicketModal] = useState(false);
 
   const {
     userData,
@@ -46,7 +35,7 @@ function App() {
     error: userDataError,
     fetchUserData,
     setShowModal,
-    refreshData 
+    refreshData
   } = useUserData();
 
   useEffect(() => {
@@ -69,7 +58,7 @@ function App() {
       if (userParam) {
         const tg_user = JSON.parse(decodeURIComponent(userParam));
         console.log('tg data:', tg_user);
-        
+
         await fetchUserData(tg_user);
       }
     } catch (err) {
@@ -95,9 +84,9 @@ function App() {
         if (contactData) {
           console.log('Контакты получены:', contactData);
           setShowModal(false);
-          
+
           if (userData?.id) {
-            fetchUserData({ id: userData.id }); 
+            fetchUserData({ id: userData.id });
           }
         }
       });
@@ -110,8 +99,8 @@ function App() {
 
   const handleCheckSubscriptions = async () => {
     console.log('Checking subscriptions...');
-    await refreshData(); 
-    
+    await refreshData();
+
     if (requiredChannels && requiredChannels.every(channel => channel.subscribe)) {
       setShowChannelsModal(false);
     }
@@ -148,16 +137,17 @@ function App() {
     >
       <WarningWindow showWarning={showWarning} />
       <div className="relative z-10 flex flex-col min-h-full">
-        <Header 
-        entrantID={userData?.entrant_id} 
-        tickets={tickets} 
-        status={status}
-        onStatusChange={() => setShowChannelsModal(true)}
+        <Header
+          entrantID={userData?.entrant_id}
+          tickets={tickets}
+          onTicketsChange={() => setShowTicketModal(true)}
+          status={status}
+          onStatusChange={() => setShowChannelsModal(true)}
         />
 
         <main className="flex-1 flex justify-center overflow-auto">
           <div className="w-full max-w-md flex flex-col items-center py-4">
-            {tab === "main" && <Home targetDate={datePrizeDraw} userUIID={userData?.user_uuid}/>}
+            {tab === "main" && <Home targetDate={datePrizeDraw} userUIID={userData?.user_uuid} />}
             {tab === "help" && (
               <div className="bg-base-200 bg-opacity-90 rounded-lg p-8 backdrop-blur-sm">
                 Help Content
@@ -175,24 +165,31 @@ function App() {
         <Dock
           activeTab={tab}
           onChange={(current) => setTab(current)}
-          isStaff={userData?.is_staff} 
+          isStaff={userData?.is_staff}
         />
       </div>
-      
+
       {/* Модальное окно для контактов */}
       <GetContact
         showModal={showModal}
         isLoading={isLoading}
         onGetContacts={handleGetContacts}
-        onSkip={handleSkip} 
+        onSkip={handleSkip}
       />
-      
+
       {/* Модальное окно для подписок на каналы */}
       <CheckSubscribe
         showModal={showChannelsModal}
         channels={requiredChannels || []}
         onClose={handleCloseChannelsModal}
-        onSubscribe={handleCheckSubscriptions} 
+        onSubscribe={handleCheckSubscriptions}
+      />
+      
+      {/* Модальное окно информации о билетах */}
+      <TicketInfo
+        tg_user={userData}
+        showModal={showTicketModal}
+        onClose={() => setShowTicketModal(false)}
       />
     </div>
   );
